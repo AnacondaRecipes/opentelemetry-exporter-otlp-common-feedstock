@@ -1,0 +1,65 @@
+{% set name = "opentelemetry-exporter-otlp-common" %}
+{% set version = "0.66b1" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name.replace('-', '_')}}-{{ version }}.tar.gz
+  sha256: 6b1403487a2185ac1feb45fd5546fdf8630ce71c36bcefaadf51e2130e9e23f9
+
+build:
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+  skip: true  # [py<310]
+  # Skip compiling byte code to avoid extremely long paths in the conda package cache
+  # Due to the nested structure of this package and the long build string, environments
+  # can exceed the Windows path limit if installed into LOCALAPPDATA
+  skip_compile_pyc:  # [win]
+    - "*"            # [win]
+
+requirements:
+  host:
+    - python
+    - pip
+    - hatchling
+  run:
+    - python
+    - opentelemetry-sdk >=1.45.1,<1.46.dev0
+  run_constrained:
+    - opentelemetry-exporter-http-transport ==0.66b1
+
+# E   ModuleNotFoundError: No module named 'opentelemetry.exporter.http'
+# https://pypi.org/project/opentelemetry-exporter-http-transport, not in the main channel.
+# Update once 'opentelemetry.exporter.http' is available.
+{% set ignore_tests = " --ignore=tests/test_http_client.py" %}
+
+test:
+  source_files:
+    - tests
+  imports:
+    - opentelemetry.exporter.otlp.common
+  commands:
+    - pip check
+    - pytest -vv tests {{ ignore_tests }}
+  requires:
+    - pip
+    - pytest
+    - opentelemetry-api ==1.45.1
+    - opentelemetry-sdk ==1.45.1
+    - opentelemetry-semantic-conventions ==0.66b1
+
+about:
+  home: https://opentelemetry.io
+  license: Apache-2.0
+  license_file: LICENSE
+  license_family: Apache
+  summary: OpenTelemetry OTLP HTTP export utilities
+  description: This package is intended to be used by OpenTelemetry signal exporters (traces, metrics, logs) that send telemetry with OTLP. Currently, all functionality in this package is marked as internal and is not intended for use directly by application developers.
+  doc_url: https://opentelemetry.io/docs
+  dev_url: https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-common
+
+extra:
+  recipe-maintainers:
+    - xhochy

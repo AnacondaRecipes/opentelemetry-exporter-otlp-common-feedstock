@@ -1,5 +1,5 @@
 {% set name = "opentelemetry-exporter-otlp-common" %}
-{% set version = "0.66b1" %}
+{% set version = "0.66b2" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name.replace('-', '_')}}-{{ version }}.tar.gz
-  sha256: 6b1403487a2185ac1feb45fd5546fdf8630ce71c36bcefaadf51e2130e9e23f9
+  sha256: 06f5a9b88638e310efa1f1d206cdf6b75393e112aba4e174a963416192bd1028
 
 build:
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
@@ -26,14 +26,9 @@ requirements:
     - hatchling
   run:
     - python
-    - opentelemetry-sdk >=1.45.1,<1.46.dev0
+    - opentelemetry-sdk >=1.45.2,<1.46.dev0
   run_constrained:
-    - opentelemetry-exporter-http-transport ==0.66b1
-
-# E   ModuleNotFoundError: No module named 'opentelemetry.exporter.http'
-# https://pypi.org/project/opentelemetry-exporter-http-transport, not in the main channel.
-# Update once 'opentelemetry.exporter.http' is available.
-{% set ignore_tests = " --ignore=tests/test_http_client.py" %}
+    - opentelemetry-exporter-http-transport ==0.66b2
 
 test:
   source_files:
@@ -42,13 +37,14 @@ test:
     - opentelemetry.exporter.otlp.common
   commands:
     - pip check
-    - pytest -vv tests {{ ignore_tests }}
+    - pytest -vv tests
   requires:
     - pip
     - pytest
-    - opentelemetry-api ==1.45.1
-    - opentelemetry-sdk ==1.45.1
-    - opentelemetry-semantic-conventions ==0.66b1
+    - opentelemetry-exporter-http-transport ==0.66b2
+    - opentelemetry-api ==1.45.2
+    - opentelemetry-sdk ==1.45.2
+    - opentelemetry-semantic-conventions ==0.66b2
 
 about:
   home: https://opentelemetry.io
